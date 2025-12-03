@@ -1,7 +1,7 @@
 // nimi content-script.js
 // 实现全文摘要、划词点问、浮窗/侧边栏功能
 
-class KimiMini {
+class NimiMini {
   constructor() {
     this.isFloatingWindowOpen = false;
     this.isSidebarOpen = false;
@@ -179,17 +179,17 @@ class KimiMini {
   setupUI() {
     // 创建浮动按钮（摘要触发器）
     this.floatingButton = document.createElement('div');
-    this.floatingButton.id = 'kimi-mini-trigger';
+    this.floatingButton.id = 'nimi-mini-trigger';
     this.floatingButton.innerHTML = `
-      <div class="kimi-trigger-btn">✨</div>
+      <div class="nimi-trigger-btn">✨</div>
       <style>
-        #kimi-mini-trigger {
+        #nimi-mini-trigger {
           position: fixed;
           bottom: 20px;
           right: 20px;
           z-index: 10000;
         }
-        .kimi-trigger-btn {
+        .nimi-trigger-btn {
           width: 50px;
           height: 50px;
           border-radius: 50%;
@@ -203,7 +203,7 @@ class KimiMini {
           font-size: 20px;
           transition: transform 0.2s;
         }
-        .kimi-trigger-btn:hover {
+        .nimi-trigger-btn:hover {
           transform: scale(1.1);
         }
       </style>
@@ -252,14 +252,14 @@ class KimiMini {
 
     if (selectedText.length > 3 && selectedText.length < 800) {
       // 移除之前的按钮
-      const existingBtn = document.querySelector('.kimi-selection-btn');
+      const existingBtn = document.querySelector('.nimi-selection-btn');
       if (existingBtn) {
         existingBtn.remove();
       }
 
       // 创建按钮
       const btn = document.createElement('div');
-      btn.className = 'kimi-selection-btn';
+      btn.className = 'nimi-selection-btn';
       btn.innerHTML = '💡 点我问';
       btn.style.cssText = `
         position: absolute;
@@ -323,43 +323,43 @@ class KimiMini {
   showFloatingWindow() {
     if (!this.floatingWindow) {
       this.floatingWindow = document.createElement('div');
-      this.floatingWindow.id = 'kimi-mini-floating';
+      this.floatingWindow.id = 'nimi-mini-floating';
       this.floatingWindow.style.width = '360px';
       this.floatingWindow.style.height = '480px';
       this.floatingWindow.innerHTML = `
-        <div class="kimi-header">
+        <div class="nimi-header">
           <span>✨ nimi</span>
-          <div class="kimi-header-actions">
-            <button class="kimi-copy-btn" title="复制结果 (Ctrl+C)">📋 复制</button>
-            <button class="kimi-close-btn">×</button>
+          <div class="nimi-header-actions">
+            <button class="nimi-copy-btn" title="复制结果 (Ctrl+C)">📋 复制</button>
+            <button class="nimi-close-btn">×</button>
           </div>
         </div>
-        <div class="kimi-tabs">
-          <button class="kimi-tab active" data-tab="summary">📄 摘要</button>
-          <button class="kimi-tab" data-tab="chat">💬 对话</button>
+        <div class="nimi-tabs">
+          <button class="nimi-tab active" data-tab="summary">📄 摘要</button>
+          <button class="nimi-tab" data-tab="chat">💬 对话</button>
         </div>
-        <div class="kimi-content">
-          <div class="kimi-tab-content kimi-summary-tab active">
-            <button class="kimi-summarize-btn">📄 生成全文摘要</button>
-            <div class="kimi-result"></div>
+        <div class="nimi-content">
+          <div class="nimi-tab-content nimi-summary-tab active">
+            <button class="nimi-summarize-btn">📄 生成全文摘要</button>
+            <div class="nimi-result"></div>
           </div>
-          <div class="kimi-tab-content kimi-chat-tab">
-            <div class="kimi-chat-container">
-              <div class="kimi-chat-messages"></div>
-              <div class="kimi-chat-input-area">
-                <textarea class="kimi-chat-input" placeholder="输入消息... (Shift+Enter换行，Enter发送)"></textarea>
-                <div class="kimi-chat-actions">
-                  <button class="kimi-new-chat-btn" title="新建对话">🆕</button>
-                  <button class="kimi-send-btn" title="发送消息 (Enter)">发送</button>
+          <div class="nimi-tab-content nimi-chat-tab">
+            <div class="nimi-chat-container">
+              <div class="nimi-chat-messages"></div>
+              <div class="nimi-chat-input-area">
+                <textarea class="nimi-chat-input" placeholder="输入消息... (Shift+Enter换行，Enter发送)"></textarea>
+                <div class="nimi-chat-actions">
+                  <button class="nimi-new-chat-btn" title="新建对话">🆕</button>
+                  <button class="nimi-send-btn" title="发送消息 (Enter)">发送</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="kimi-copyright">@世界那么哒</div>
-        <div class="kimi-resize-handle" title="拖拽调整大小"></div>
+        <div class="nimi-copyright">@世界那么哒</div>
+        <div class="nimi-resize-handle" title="拖拽调整大小"></div>
         <style>
-          #kimi-mini-floating {
+          #nimi-mini-floating {
             position: fixed;
             bottom: 90px;
             right: 20px;
@@ -373,7 +373,7 @@ class KimiMini {
             flex-direction: column;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           }
-          .kimi-header {
+          .nimi-header {
             padding: 12px 16px;
             border-bottom: 1px solid #eee;
             display: flex;
@@ -384,11 +384,11 @@ class KimiMini {
             background: white;
             border-radius: 12px 12px 0 0;
           }
-          .kimi-header-actions {
+          .nimi-header-actions {
             display: flex;
             gap: 8px;
           }
-          .kimi-copy-btn {
+          .nimi-copy-btn {
             background: linear-gradient(135deg, #49bccf 0%, #3aa8c8 100%);
             color: white;
             border: none;
@@ -399,13 +399,13 @@ class KimiMini {
             transition: opacity 0.2s;
             box-shadow: 0 2px 8px rgba(73, 188, 207, 0.3);
           }
-          .kimi-copy-btn:hover {
+          .nimi-copy-btn:hover {
             opacity: 0.8;
           }
-          .kimi-copy-btn:active {
+          .nimi-copy-btn:active {
             transform: scale(0.95);
           }
-          .kimi-close-btn {
+          .nimi-close-btn {
             background: none;
             border: none;
             font-size: 20px;
@@ -416,15 +416,15 @@ class KimiMini {
             height: 24px;
             transition: color 0.2s;
           }
-          .kimi-close-btn:hover {
+          .nimi-close-btn:hover {
             color: #ff6b6b;
           }
-          .kimi-content {
+          .nimi-content {
             flex: 1;
             padding: 16px;
             overflow-y: auto;
           }
-          .kimi-summarize-btn {
+          .nimi-summarize-btn {
             width: 100%;
             padding: 12px;
             background: linear-gradient(135deg, #49bccf 0%, #3aa8c8 50%, #2d9ab7 100%);
@@ -437,33 +437,33 @@ class KimiMini {
             margin-bottom: 16px;
             box-shadow: 0 4px 15px rgba(73, 188, 207, 0.3);
           }
-          .kimi-summarize-btn:hover {
+          .nimi-summarize-btn:hover {
             opacity: 0.9;
           }
-          .kimi-result {
+          .nimi-result {
             font-size: 14px;
             line-height: 1.6;
             color: #333;
           }
-          .kimi-result h1,
-          .kimi-result h2,
-          .kimi-result h3 {
+          .nimi-result h1,
+          .nimi-result h2,
+          .nimi-result h3 {
             color: #2d9ab7;
             margin: 16px 0 12px 0;
             font-weight: 600;
           }
-          .kimi-result h1 { font-size: 20px; }
-          .kimi-result h2 { font-size: 18px; }
-          .kimi-result h3 { font-size: 16px; }
-          .kimi-result p {
+          .nimi-result h1 { font-size: 20px; }
+          .nimi-result h2 { font-size: 18px; }
+          .nimi-result h3 { font-size: 16px; }
+          .nimi-result p {
             margin: 12px 0;
             line-height: 1.8;
           }
-          .kimi-result strong {
+          .nimi-result strong {
             font-weight: 600;
             color: #2d9ab7;
           }
-          .kimi-result code {
+          .nimi-result code {
             background: #f0f8fa;
             padding: 2px 6px;
             border-radius: 4px;
@@ -471,21 +471,21 @@ class KimiMini {
             font-size: 13px;
             color: #2d9ab7;
           }
-          .kimi-result li {
+          .nimi-result li {
             margin: 8px 0;
             padding-left: 8px;
           }
-          .kimi-result a {
+          .nimi-result a {
             color: #49bccf;
             text-decoration: none;
             border-bottom: 1px solid #49bccf;
           }
-          .kimi-loading {
+          .nimi-loading {
             text-align: center;
             color: #999;
             padding: 20px;
           }
-          .kimi-resize-handle {
+          .nimi-resize-handle {
             position: absolute;
             bottom: 0;
             right: 0;
@@ -496,17 +496,17 @@ class KimiMini {
             border-radius: 0 0 12px 0;
             transition: background 0.2s;
           }
-          .kimi-resize-handle:hover {
+          .nimi-resize-handle:hover {
             background: linear-gradient(135deg, transparent 50%, #49bccf 50%);
           }
 
           /* 标签页样式 */
-          .kimi-tabs {
+          .nimi-tabs {
             display: flex;
             border-bottom: 1px solid #eee;
             background: #f8f9fa;
           }
-          .kimi-tab {
+          .nimi-tab {
             flex: 1;
             padding: 12px 16px;
             background: none;
@@ -517,33 +517,33 @@ class KimiMini {
             color: #666;
             transition: all 0.2s;
           }
-          .kimi-tab:hover {
+          .nimi-tab:hover {
             background: #e9ecef;
           }
-          .kimi-tab.active {
+          .nimi-tab.active {
             color: #49bccf;
             border-bottom-color: #49bccf;
             font-weight: 600;
           }
 
           /* 标签页内容 */
-          .kimi-tab-content {
+          .nimi-tab-content {
             display: none;
             flex: 1;
             flex-direction: column;
           }
-          .kimi-tab-content.active {
+          .nimi-tab-content.active {
             display: flex;
           }
 
           /* 对话样式 */
-          .kimi-chat-container {
+          .nimi-chat-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             height: 100%;
           }
-          .kimi-chat-messages {
+          .nimi-chat-messages {
             flex: 1;
             overflow-y: auto;
             padding: 16px;
@@ -551,7 +551,7 @@ class KimiMini {
             flex-direction: column;
             gap: 12px;
           }
-          .kimi-chat-message {
+          .nimi-chat-message {
             max-width: 85%;
             padding: 10px 14px;
             border-radius: 12px;
@@ -559,30 +559,75 @@ class KimiMini {
             font-size: 14px;
             word-wrap: break-word;
           }
-          .kimi-chat-message.user {
+          .nimi-chat-message.user {
             align-self: flex-end;
             background: linear-gradient(135deg, #49bccf 0%, #3aa8c8 100%);
             color: white;
             border-bottom-right-radius: 4px;
           }
-          .kimi-chat-message.assistant {
+          .nimi-chat-message.assistant {
             align-self: flex-start;
             background: #f0f8fa;
             color: #333;
             border-bottom-left-radius: 4px;
           }
-          .kimi-chat-message .timestamp {
+
+          /* 对话消息中的Markdown样式 */
+          .nimi-chat-message.assistant h1,
+          .nimi-chat-message.assistant h2,
+          .nimi-chat-message.assistant h3 {
+            color: #2d9ab7;
+            margin: 16px 0 12px 0;
+            font-weight: 600;
+          }
+          .nimi-chat-message.assistant h1 { font-size: 20px; }
+          .nimi-chat-message.assistant h2 { font-size: 18px; }
+          .nimi-chat-message.assistant h3 { font-size: 16px; }
+          .nimi-chat-message.assistant p {
+            margin: 12px 0;
+            line-height: 1.8;
+          }
+          .nimi-chat-message.assistant strong {
+            font-weight: 600;
+            color: #2d9ab7;
+          }
+          .nimi-chat-message.assistant code {
+            background: linear-gradient(135deg, #f0f8fa 0%, #e8f8fa 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Monaco, monospace;
+            font-size: 13px;
+            color: #2d9ab7;
+            border: 1px solid #49bccf;
+          }
+          .nimi-chat-message.assistant li {
+            margin: 8px 0;
+            padding-left: 8px;
+          }
+          .nimi-chat-message.assistant a {
+            color: #49bccf;
+            text-decoration: none;
+            border-bottom: 1px solid #49bccf;
+            padding: 0 2px;
+            transition: all 0.2s;
+          }
+          .nimi-chat-message.assistant a:hover {
+            background: #e8f8fa;
+            border-radius: 2px;
+          }
+
+          .nimi-chat-message .timestamp {
             font-size: 11px;
             opacity: 0.7;
             margin-top: 4px;
             text-align: right;
           }
-          .kimi-chat-input-area {
+          .nimi-chat-input-area {
             border-top: 1px solid #eee;
             padding: 12px 16px;
             background: white;
           }
-          .kimi-chat-input {
+          .nimi-chat-input {
             width: 100%;
             min-height: 60px;
             max-height: 120px;
@@ -594,17 +639,17 @@ class KimiMini {
             font-family: inherit;
             margin-bottom: 8px;
           }
-          .kimi-chat-input:focus {
+          .nimi-chat-input:focus {
             outline: none;
             border-color: #49bccf;
             box-shadow: 0 0 0 2px rgba(73, 188, 207, 0.2);
           }
-          .kimi-chat-actions {
+          .nimi-chat-actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
           }
-          .kimi-new-chat-btn {
+          .nimi-new-chat-btn {
             background: #f0f8fa;
             border: 1px solid #ddd;
             border-radius: 6px;
@@ -614,11 +659,11 @@ class KimiMini {
             color: #666;
             transition: all 0.2s;
           }
-          .kimi-new-chat-btn:hover {
+          .nimi-new-chat-btn:hover {
             background: #e0f0f5;
             color: #49bccf;
           }
-          .kimi-send-btn {
+          .nimi-send-btn {
             background: linear-gradient(135deg, #49bccf 0%, #3aa8c8 100%);
             color: white;
             border: none;
@@ -629,14 +674,14 @@ class KimiMini {
             cursor: pointer;
             transition: opacity 0.2s;
           }
-          .kimi-send-btn:hover {
+          .nimi-send-btn:hover {
             opacity: 0.9;
           }
-          .kimi-send-btn:disabled {
+          .nimi-send-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
           }
-          .kimi-chat-loading {
+          .nimi-chat-loading {
             text-align: center;
             padding: 10px;
             color: #999;
@@ -644,7 +689,7 @@ class KimiMini {
           }
 
           /* 版权信息 */
-          .kimi-copyright {
+          .nimi-copyright {
             text-align: center;
             padding: 8px;
             color: #a0a0a0;
@@ -673,22 +718,22 @@ class KimiMini {
       document.body.appendChild(this.floatingWindow);
 
       // 绑定关闭事件
-      this.floatingWindow.querySelector('.kimi-close-btn').addEventListener('click', () => {
+      this.floatingWindow.querySelector('.nimi-close-btn').addEventListener('click', () => {
         this.hideFloatingWindow();
       });
 
       // 绑定复制事件
-      this.floatingWindow.querySelector('.kimi-copy-btn').addEventListener('click', (e) => {
+      this.floatingWindow.querySelector('.nimi-copy-btn').addEventListener('click', (e) => {
         this.copyToClipboard(e.currentTarget);
       });
 
       // 绑定摘要事件
-      this.floatingWindow.querySelector('.kimi-summarize-btn').addEventListener('click', () => {
+      this.floatingWindow.querySelector('.nimi-summarize-btn').addEventListener('click', () => {
         this.generateSummary();
       });
 
       // 绑定标签页切换事件
-      this.floatingWindow.querySelectorAll('.kimi-tab').forEach(tab => {
+      this.floatingWindow.querySelectorAll('.nimi-tab').forEach(tab => {
         tab.addEventListener('click', (e) => {
           const tabName = e.currentTarget.dataset.tab;
           this.switchTab(tabName, false);
@@ -696,9 +741,9 @@ class KimiMini {
       });
 
       // 绑定对话事件
-      const chatInput = this.floatingWindow.querySelector('.kimi-chat-input');
-      const sendBtn = this.floatingWindow.querySelector('.kimi-send-btn');
-      const newChatBtn = this.floatingWindow.querySelector('.kimi-new-chat-btn');
+      const chatInput = this.floatingWindow.querySelector('.nimi-chat-input');
+      const sendBtn = this.floatingWindow.querySelector('.nimi-send-btn');
+      const newChatBtn = this.floatingWindow.querySelector('.nimi-new-chat-btn');
 
       sendBtn.addEventListener('click', () => {
         this.sendChatMessage(chatInput.value, false);
@@ -749,42 +794,42 @@ class KimiMini {
   showSidebar() {
     if (!this.sidebar) {
       this.sidebar = document.createElement('div');
-      this.sidebar.id = 'kimi-mini-sidebar';
+      this.sidebar.id = 'nimi-mini-sidebar';
       this.sidebar.style.width = '340px';
       this.sidebar.innerHTML = `
-        <div class="kimi-sidebar-header">
+        <div class="nimi-sidebar-header">
           <span>✨ nimi</span>
-          <div class="kimi-sidebar-header-actions">
-            <button class="kimi-sidebar-copy-btn" title="复制结果 (Ctrl+C)">📋 复制</button>
-            <button class="kimi-sidebar-close">×</button>
+          <div class="nimi-sidebar-header-actions">
+            <button class="nimi-sidebar-copy-btn" title="复制结果 (Ctrl+C)">📋 复制</button>
+            <button class="nimi-sidebar-close">×</button>
           </div>
         </div>
-        <div class="kimi-sidebar-tabs">
-          <button class="kimi-sidebar-tab active" data-tab="summary">📄 摘要</button>
-          <button class="kimi-sidebar-tab" data-tab="chat">💬 对话</button>
+        <div class="nimi-sidebar-tabs">
+          <button class="nimi-sidebar-tab active" data-tab="summary">📄 摘要</button>
+          <button class="nimi-sidebar-tab" data-tab="chat">💬 对话</button>
         </div>
-        <div class="kimi-sidebar-content">
-          <div class="kimi-sidebar-tab-content kimi-sidebar-summary-tab active">
-            <button class="kimi-sidebar-summarize">📄 生成全文摘要</button>
-            <div class="kimi-sidebar-result"></div>
+        <div class="nimi-sidebar-content">
+          <div class="nimi-sidebar-tab-content nimi-sidebar-summary-tab active">
+            <button class="nimi-sidebar-summarize">📄 生成全文摘要</button>
+            <div class="nimi-sidebar-result"></div>
           </div>
-          <div class="kimi-sidebar-tab-content kimi-sidebar-chat-tab">
-            <div class="kimi-sidebar-chat-container">
-              <div class="kimi-sidebar-chat-messages"></div>
-              <div class="kimi-sidebar-chat-input-area">
-                <textarea class="kimi-sidebar-chat-input" placeholder="输入消息... (Shift+Enter换行，Enter发送)"></textarea>
-                <div class="kimi-sidebar-chat-actions">
-                  <button class="kimi-sidebar-new-chat-btn" title="新建对话">🆕</button>
-                  <button class="kimi-sidebar-send-btn" title="发送消息 (Enter)">发送</button>
+          <div class="nimi-sidebar-tab-content nimi-sidebar-chat-tab">
+            <div class="nimi-sidebar-chat-container">
+              <div class="nimi-sidebar-chat-messages"></div>
+              <div class="nimi-sidebar-chat-input-area">
+                <textarea class="nimi-sidebar-chat-input" placeholder="输入消息... (Shift+Enter换行，Enter发送)"></textarea>
+                <div class="nimi-sidebar-chat-actions">
+                  <button class="nimi-sidebar-new-chat-btn" title="新建对话">🆕</button>
+                  <button class="nimi-sidebar-send-btn" title="发送消息 (Enter)">发送</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="kimi-sidebar-copyright">@世界那么哒</div>
-        <div class="kimi-sidebar-resize-handle" title="拖拽调整大小"></div>
+        <div class="nimi-sidebar-copyright">@世界那么哒</div>
+        <div class="nimi-sidebar-resize-handle" title="拖拽调整大小"></div>
         <style>
-          #kimi-mini-sidebar {
+          #nimi-mini-sidebar {
             position: fixed;
             top: 0;
             right: 0;
@@ -797,7 +842,7 @@ class KimiMini {
             flex-direction: column;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           }
-          .kimi-sidebar-header {
+          .nimi-sidebar-header {
             padding: 16px;
             border-bottom: 1px solid #eee;
             display: flex;
@@ -806,11 +851,11 @@ class KimiMini {
             font-weight: 600;
             color: #333;
           }
-          .kimi-sidebar-header-actions {
+          .nimi-sidebar-header-actions {
             display: flex;
             gap: 8px;
           }
-          .kimi-sidebar-copy-btn {
+          .nimi-sidebar-copy-btn {
             background: linear-gradient(135deg, #49bccf 0%, #3aa8c8 100%);
             color: white;
             border: none;
@@ -821,28 +866,28 @@ class KimiMini {
             transition: opacity 0.2s;
             box-shadow: 0 2px 8px rgba(73, 188, 207, 0.3);
           }
-          .kimi-sidebar-copy-btn:hover {
+          .nimi-sidebar-copy-btn:hover {
             opacity: 0.8;
           }
-          .kimi-sidebar-copy-btn:active {
+          .nimi-sidebar-copy-btn:active {
             transform: scale(0.95);
           }
-          .kimi-sidebar-close {
+          .nimi-sidebar-close {
             background: none;
             border: none;
             font-size: 24px;
             cursor: pointer;
             color: #999;
           }
-          .kimi-sidebar-close:hover {
+          .nimi-sidebar-close:hover {
             color: #333;
           }
-          .kimi-sidebar-content {
+          .nimi-sidebar-content {
             flex: 1;
             padding: 16px;
             overflow-y: auto;
           }
-          .kimi-sidebar-summarize {
+          .nimi-sidebar-summarize {
             width: 100%;
             padding: 12px;
             background: linear-gradient(135deg, #49bccf 0%, #3aa8c8 50%, #2d9ab7 100%);
@@ -855,30 +900,30 @@ class KimiMini {
             margin-bottom: 16px;
             box-shadow: 0 4px 15px rgba(73, 188, 207, 0.3);
           }
-          .kimi-sidebar-result {
+          .nimi-sidebar-result {
             font-size: 14px;
             line-height: 1.8;
             color: #333;
           }
-          .kimi-sidebar-result h1,
-          .kimi-sidebar-result h2,
-          .kimi-sidebar-result h3 {
+          .nimi-sidebar-result h1,
+          .nimi-sidebar-result h2,
+          .nimi-sidebar-result h3 {
             color: #2d9ab7;
             margin: 16px 0 12px 0;
             font-weight: 600;
           }
-          .kimi-sidebar-result h1 { font-size: 20px; }
-          .kimi-sidebar-result h2 { font-size: 18px; }
-          .kimi-sidebar-result h3 { font-size: 16px; }
-          .kimi-sidebar-result p {
+          .nimi-sidebar-result h1 { font-size: 20px; }
+          .nimi-sidebar-result h2 { font-size: 18px; }
+          .nimi-sidebar-result h3 { font-size: 16px; }
+          .nimi-sidebar-result p {
             margin: 12px 0;
             line-height: 1.8;
           }
-          .kimi-sidebar-result strong {
+          .nimi-sidebar-result strong {
             font-weight: 600;
             color: #2d9ab7;
           }
-          .kimi-sidebar-result code {
+          .nimi-sidebar-result code {
             background: #f0f8fa;
             padding: 2px 6px;
             border-radius: 4px;
@@ -886,16 +931,16 @@ class KimiMini {
             font-size: 13px;
             color: #2d9ab7;
           }
-          .kimi-sidebar-result li {
+          .nimi-sidebar-result li {
             margin: 8px 0;
             padding-left: 8px;
           }
-          .kimi-sidebar-result a {
+          .nimi-sidebar-result a {
             color: #49bccf;
             text-decoration: none;
             border-bottom: 1px solid #49bccf;
           }
-          .kimi-sidebar-resize-handle {
+          .nimi-sidebar-resize-handle {
             position: absolute;
             top: 50%;
             left: 0;
@@ -907,17 +952,17 @@ class KimiMini {
             border-radius: 3px 0 0 3px;
             transition: background 0.2s;
           }
-          .kimi-sidebar-resize-handle:hover {
+          .nimi-sidebar-resize-handle:hover {
             background: linear-gradient(to right, #49bccf, transparent);
           }
 
           /* 侧边栏标签页样式 */
-          .kimi-sidebar-tabs {
+          .nimi-sidebar-tabs {
             display: flex;
             border-bottom: 1px solid #eee;
             background: #f8f9fa;
           }
-          .kimi-sidebar-tab {
+          .nimi-sidebar-tab {
             flex: 1;
             padding: 12px 16px;
             background: none;
@@ -928,33 +973,33 @@ class KimiMini {
             color: #666;
             transition: all 0.2s;
           }
-          .kimi-sidebar-tab:hover {
+          .nimi-sidebar-tab:hover {
             background: #e9ecef;
           }
-          .kimi-sidebar-tab.active {
+          .nimi-sidebar-tab.active {
             color: #49bccf;
             border-bottom-color: #49bccf;
             font-weight: 600;
           }
 
           /* 侧边栏标签页内容 */
-          .kimi-sidebar-tab-content {
+          .nimi-sidebar-tab-content {
             display: none;
             flex: 1;
             flex-direction: column;
           }
-          .kimi-sidebar-tab-content.active {
+          .nimi-sidebar-tab-content.active {
             display: flex;
           }
 
           /* 侧边栏对话样式 */
-          .kimi-sidebar-chat-container {
+          .nimi-sidebar-chat-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             height: 100%;
           }
-          .kimi-sidebar-chat-messages {
+          .nimi-sidebar-chat-messages {
             flex: 1;
             overflow-y: auto;
             padding: 16px;
@@ -962,7 +1007,7 @@ class KimiMini {
             flex-direction: column;
             gap: 12px;
           }
-          .kimi-sidebar-chat-message {
+          .nimi-sidebar-chat-message {
             max-width: 85%;
             padding: 10px 14px;
             border-radius: 12px;
@@ -970,30 +1015,30 @@ class KimiMini {
             font-size: 14px;
             word-wrap: break-word;
           }
-          .kimi-sidebar-chat-message.user {
+          .nimi-sidebar-chat-message.user {
             align-self: flex-end;
             background: linear-gradient(135deg, #49bccf 0%, #3aa8c8 100%);
             color: white;
             border-bottom-right-radius: 4px;
           }
-          .kimi-sidebar-chat-message.assistant {
+          .nimi-sidebar-chat-message.assistant {
             align-self: flex-start;
             background: #f0f8fa;
             color: #333;
             border-bottom-left-radius: 4px;
           }
-          .kimi-sidebar-chat-message .timestamp {
+          .nimi-sidebar-chat-message .timestamp {
             font-size: 11px;
             opacity: 0.7;
             margin-top: 4px;
             text-align: right;
           }
-          .kimi-sidebar-chat-input-area {
+          .nimi-sidebar-chat-input-area {
             border-top: 1px solid #eee;
             padding: 12px 16px;
             background: white;
           }
-          .kimi-sidebar-chat-input {
+          .nimi-sidebar-chat-input {
             width: 100%;
             min-height: 60px;
             max-height: 120px;
@@ -1005,17 +1050,17 @@ class KimiMini {
             font-family: inherit;
             margin-bottom: 8px;
           }
-          .kimi-sidebar-chat-input:focus {
+          .nimi-sidebar-chat-input:focus {
             outline: none;
             border-color: #49bccf;
             box-shadow: 0 0 0 2px rgba(73, 188, 207, 0.2);
           }
-          .kimi-sidebar-chat-actions {
+          .nimi-sidebar-chat-actions {
             display: flex;
             justify-content: space-between;
             align-items: center;
           }
-          .kimi-sidebar-new-chat-btn {
+          .nimi-sidebar-new-chat-btn {
             background: #f0f8fa;
             border: 1px solid #ddd;
             border-radius: 6px;
@@ -1025,11 +1070,11 @@ class KimiMini {
             color: #666;
             transition: all 0.2s;
           }
-          .kimi-sidebar-new-chat-btn:hover {
+          .nimi-sidebar-new-chat-btn:hover {
             background: #e0f0f5;
             color: #49bccf;
           }
-          .kimi-sidebar-send-btn {
+          .nimi-sidebar-send-btn {
             background: linear-gradient(135deg, #49bccf 0%, #3aa8c8 100%);
             color: white;
             border: none;
@@ -1040,14 +1085,14 @@ class KimiMini {
             cursor: pointer;
             transition: opacity 0.2s;
           }
-          .kimi-sidebar-send-btn:hover {
+          .nimi-sidebar-send-btn:hover {
             opacity: 0.9;
           }
-          .kimi-sidebar-send-btn:disabled {
+          .nimi-sidebar-send-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
           }
-          .kimi-sidebar-chat-loading {
+          .nimi-sidebar-chat-loading {
             text-align: center;
             padding: 10px;
             color: #999;
@@ -1055,7 +1100,7 @@ class KimiMini {
           }
 
           /* 侧边栏版权信息 */
-          .kimi-sidebar-copyright {
+          .nimi-sidebar-copyright {
             text-align: center;
             padding: 8px;
             color: #a0a0a0;
@@ -1088,21 +1133,21 @@ class KimiMini {
       document.body.style.marginRight = '340px';
 
       // 绑定事件
-      this.sidebar.querySelector('.kimi-sidebar-close').addEventListener('click', () => {
+      this.sidebar.querySelector('.nimi-sidebar-close').addEventListener('click', () => {
         this.hideSidebar();
       });
 
       // 绑定复制事件
-      this.sidebar.querySelector('.kimi-sidebar-copy-btn').addEventListener('click', (e) => {
+      this.sidebar.querySelector('.nimi-sidebar-copy-btn').addEventListener('click', (e) => {
         this.copyToClipboard(e.currentTarget, true);
       });
 
-      this.sidebar.querySelector('.kimi-sidebar-summarize').addEventListener('click', () => {
+      this.sidebar.querySelector('.nimi-sidebar-summarize').addEventListener('click', () => {
         this.generateSummary();
       });
 
       // 绑定标签页切换事件
-      this.sidebar.querySelectorAll('.kimi-sidebar-tab').forEach(tab => {
+      this.sidebar.querySelectorAll('.nimi-sidebar-tab').forEach(tab => {
         tab.addEventListener('click', (e) => {
           const tabName = e.currentTarget.dataset.tab;
           this.switchTab(tabName, true);
@@ -1110,9 +1155,9 @@ class KimiMini {
       });
 
       // 绑定对话事件
-      const chatInput = this.sidebar.querySelector('.kimi-sidebar-chat-input');
-      const sendBtn = this.sidebar.querySelector('.kimi-sidebar-send-btn');
-      const newChatBtn = this.sidebar.querySelector('.kimi-sidebar-new-chat-btn');
+      const chatInput = this.sidebar.querySelector('.nimi-sidebar-chat-input');
+      const sendBtn = this.sidebar.querySelector('.nimi-sidebar-send-btn');
+      const newChatBtn = this.sidebar.querySelector('.nimi-sidebar-new-chat-btn');
 
       sendBtn.addEventListener('click', () => {
         this.sendChatMessage(chatInput.value, true);
@@ -1151,10 +1196,10 @@ class KimiMini {
   // 生成全文摘要
   async generateSummary() {
     const resultArea = this.settings.displayMode === 'floating'
-      ? this.floatingWindow.querySelector('.kimi-result')
-      : this.sidebar.querySelector('.kimi-sidebar-result');
+      ? this.floatingWindow.querySelector('.nimi-result')
+      : this.sidebar.querySelector('.nimi-sidebar-result');
 
-    resultArea.innerHTML = '<div class="kimi-loading">🤔 正在生成摘要...</div>';
+    resultArea.innerHTML = '<div class="nimi-loading">🤔 正在生成摘要...</div>';
 
     // 提取页面文本
     const pageText = this.extractPageText();
@@ -1329,14 +1374,14 @@ class KimiMini {
     // 创建tooltip
     const tooltip = document.createElement('div');
     tooltip.id = tooltipId;
-    tooltip.className = 'kimi-tooltip';
+    tooltip.className = 'nimi-tooltip';
     tooltip.innerHTML = `
-      <div class="kimi-tooltip-content">${this.renderMarkdown(content)}</div>
-      <div class="kimi-tooltip-actions">
-        <button class="kimi-tooltip-close">×</button>
+      <div class="nimi-tooltip-content">${this.renderMarkdown(content)}</div>
+      <div class="nimi-tooltip-actions">
+        <button class="nimi-tooltip-close">×</button>
       </div>
       <style>
-        .kimi-tooltip {
+        .nimi-tooltip {
           position: absolute;
           background: white;
           border: 1px solid #ddd;
@@ -1349,20 +1394,20 @@ class KimiMini {
           line-height: 1.6;
           margin-top: 8px;
         }
-        .kimi-tooltip-content {
+        .nimi-tooltip-content {
           color: #333;
           margin-bottom: 8px;
         }
-        .kimi-tooltip-content h1,
-        .kimi-tooltip-content h2,
-        .kimi-tooltip-content h3 {
+        .nimi-tooltip-content h1,
+        .nimi-tooltip-content h2,
+        .nimi-tooltip-content h3 {
           color: #2d9ab7;
           margin: 8px 0 4px 0;
         }
-        .kimi-tooltip-content p {
+        .nimi-tooltip-content p {
           margin: 8px 0;
         }
-        .kimi-tooltip-content code {
+        .nimi-tooltip-content code {
           background: #f0f8fa;
           padding: 2px 6px;
           border-radius: 4px;
@@ -1370,14 +1415,14 @@ class KimiMini {
           font-size: 12px;
           color: #2d9ab7;
         }
-        .kimi-tooltip-content a {
+        .nimi-tooltip-content a {
           color: #49bccf;
           text-decoration: none;
         }
-        .kimi-tooltip-actions {
+        .nimi-tooltip-actions {
           text-align: right;
         }
-        .kimi-tooltip-close {
+        .nimi-tooltip-close {
           background: none;
           border: none;
           color: #999;
@@ -1385,7 +1430,7 @@ class KimiMini {
           font-size: 16px;
           padding: 0;
         }
-        .kimi-tooltip-close:hover {
+        .nimi-tooltip-close:hover {
           color: #333;
         }
       </style>
@@ -1397,7 +1442,7 @@ class KimiMini {
     tooltip.style.top = `${rect.bottom + window.scrollY}px`;
 
     // 绑定关闭事件
-    tooltip.querySelector('.kimi-tooltip-close').addEventListener('click', () => {
+    tooltip.querySelector('.nimi-tooltip-close').addEventListener('click', () => {
       tooltip.remove();
       this.tooltipHistory.delete(tooltipId);
     });
@@ -1420,7 +1465,7 @@ class KimiMini {
 
     element.addEventListener('mousedown', (e) => {
       // 避免从调整手柄开始拖拽
-      if (e.target.classList.contains('kimi-resize-handle')) return;
+      if (e.target.classList.contains('nimi-resize-handle')) return;
       isDragging = true;
       initialX = e.clientX - element.offsetLeft;
       initialY = e.clientY - element.offsetTop;
@@ -1443,7 +1488,7 @@ class KimiMini {
 
   // 可调整大小功能
   makeResizable(element, isSidebar = false) {
-    const selector = isSidebar ? '.kimi-sidebar-resize-handle' : '.kimi-resize-handle';
+    const selector = isSidebar ? '.nimi-sidebar-resize-handle' : '.nimi-resize-handle';
     const resizeHandle = element.querySelector(selector);
     let isResizing = false;
     let initialWidth;
@@ -1483,7 +1528,7 @@ class KimiMini {
 
   // 复制到剪贴板
   async copyToClipboard(button, isSidebar = false) {
-    const selector = isSidebar ? '.kimi-sidebar-result' : '.kimi-result';
+    const selector = isSidebar ? '.nimi-sidebar-result' : '.nimi-result';
     const resultArea = isSidebar ? this.sidebar.querySelector(selector) : this.floatingWindow.querySelector(selector);
     const content = resultArea.textContent;
 
@@ -1526,7 +1571,7 @@ class KimiMini {
 
   // 切换标签页
   switchTab(tabName, isSidebar) {
-    const tabPrefix = isSidebar ? 'kimi-sidebar-' : 'kimi-';
+    const tabPrefix = isSidebar ? 'nimi-sidebar-' : 'nimi-';
     const container = isSidebar ? this.sidebar : this.floatingWindow;
 
     // 更新标签按钮状态
@@ -1549,8 +1594,8 @@ class KimiMini {
   // 刷新聊天消息显示
   refreshChatMessages(isSidebar) {
     const messagesContainer = isSidebar
-      ? this.sidebar.querySelector('.kimi-sidebar-chat-messages')
-      : this.floatingWindow.querySelector('.kimi-chat-messages');
+      ? this.sidebar.querySelector('.nimi-sidebar-chat-messages')
+      : this.floatingWindow.querySelector('.nimi-chat-messages');
 
     if (!messagesContainer) return;
 
@@ -1562,7 +1607,7 @@ class KimiMini {
 
     if (messages.length === 0) {
       const emptyMsg = document.createElement('div');
-      emptyMsg.className = isSidebar ? 'kimi-sidebar-chat-message assistant' : 'kimi-chat-message assistant';
+      emptyMsg.className = isSidebar ? 'nimi-sidebar-chat-message assistant' : 'nimi-chat-message assistant';
       emptyMsg.textContent = '开始新的对话吧！';
       messagesContainer.appendChild(emptyMsg);
       return;
@@ -1572,8 +1617,8 @@ class KimiMini {
     messages.forEach(msg => {
       const messageEl = document.createElement('div');
       messageEl.className = isSidebar
-        ? `kimi-sidebar-chat-message ${msg.role}`
-        : `kimi-chat-message ${msg.role}`;
+        ? `nimi-sidebar-chat-message ${msg.role}`
+        : `nimi-chat-message ${msg.role}`;
 
       messageEl.innerHTML = `
         <div>${this.escapeHtml(msg.content)}</div>
@@ -1609,12 +1654,12 @@ class KimiMini {
     if (!content) return;
 
     const chatInput = isSidebar
-      ? this.sidebar.querySelector('.kimi-sidebar-chat-input')
-      : this.floatingWindow.querySelector('.kimi-chat-input');
+      ? this.sidebar.querySelector('.nimi-sidebar-chat-input')
+      : this.floatingWindow.querySelector('.nimi-chat-input');
 
     const sendBtn = isSidebar
-      ? this.sidebar.querySelector('.kimi-sidebar-send-btn')
-      : this.floatingWindow.querySelector('.kimi-send-btn');
+      ? this.sidebar.querySelector('.nimi-sidebar-send-btn')
+      : this.floatingWindow.querySelector('.nimi-send-btn');
 
     // 清空输入框并禁用发送按钮
     chatInput.value = '';
@@ -1676,13 +1721,13 @@ class KimiMini {
   // 创建AI消息占位符
   createAIMessagePlaceholder(isSidebar) {
     const messagesContainer = isSidebar
-      ? this.sidebar.querySelector('.kimi-sidebar-chat-messages')
-      : this.floatingWindow.querySelector('.kimi-chat-messages');
+      ? this.sidebar.querySelector('.nimi-sidebar-chat-messages')
+      : this.floatingWindow.querySelector('.nimi-chat-messages');
 
     const messageId = 'ai-message-' + Date.now();
     const messageEl = document.createElement('div');
     messageEl.id = messageId;
-    messageEl.className = isSidebar ? 'kimi-sidebar-chat-message assistant' : 'kimi-chat-message assistant';
+    messageEl.className = isSidebar ? 'nimi-sidebar-chat-message assistant' : 'nimi-chat-message assistant';
     messageEl.innerHTML = `
       <div class="ai-streaming-content"></div>
       <div class="timestamp">${this.formatTime(new Date().toISOString())}</div>
@@ -1699,8 +1744,8 @@ class KimiMini {
   // 更新AI消息内容（流式）
   updateAIMessageContent(isSidebar, messageId, content) {
     const messagesContainer = isSidebar
-      ? this.sidebar.querySelector('.kimi-sidebar-chat-messages')
-      : this.floatingWindow.querySelector('.kimi-chat-messages');
+      ? this.sidebar.querySelector('.nimi-sidebar-chat-messages')
+      : this.floatingWindow.querySelector('.nimi-chat-messages');
 
     const messageEl = messagesContainer.querySelector(`#${messageId}`);
     if (messageEl) {
@@ -1721,8 +1766,8 @@ class KimiMini {
   // 完成AI消息（流式结束）
   finalizeAIMessage(isSidebar, messageId, content) {
     const messagesContainer = isSidebar
-      ? this.sidebar.querySelector('.kimi-sidebar-chat-messages')
-      : this.floatingWindow.querySelector('.kimi-chat-messages');
+      ? this.sidebar.querySelector('.nimi-sidebar-chat-messages')
+      : this.floatingWindow.querySelector('.nimi-chat-messages');
 
     const messageEl = messagesContainer.querySelector(`#${messageId}`);
     if (messageEl) {
@@ -1735,7 +1780,7 @@ class KimiMini {
         contentEl.innerHTML = this.renderMarkdown(content);
 
         // 更新消息类名
-        messageEl.className = isSidebar ? 'kimi-sidebar-chat-message assistant' : 'kimi-chat-message assistant';
+        messageEl.className = isSidebar ? 'nimi-sidebar-chat-message assistant' : 'nimi-chat-message assistant';
 
         // 滚动到底部
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -1774,10 +1819,10 @@ class KimiMini {
   // 显示/隐藏聊天加载状态
   showChatLoading(isSidebar, show) {
     const messagesContainer = isSidebar
-      ? this.sidebar.querySelector('.kimi-sidebar-chat-messages')
-      : this.floatingWindow.querySelector('.kimi-chat-messages');
+      ? this.sidebar.querySelector('.nimi-sidebar-chat-messages')
+      : this.floatingWindow.querySelector('.nimi-chat-messages');
 
-    const loadingClass = isSidebar ? 'kimi-sidebar-chat-loading' : 'kimi-chat-loading';
+    const loadingClass = isSidebar ? 'nimi-sidebar-chat-loading' : 'nimi-chat-loading';
     let loadingEl = messagesContainer.querySelector(`.${loadingClass}`);
 
     if (show) {
@@ -1890,8 +1935,8 @@ class KimiMini {
 
     // 清空输入框
     const chatInput = isSidebar
-      ? this.sidebar.querySelector('.kimi-sidebar-chat-input')
-      : this.floatingWindow.querySelector('.kimi-chat-input');
+      ? this.sidebar.querySelector('.nimi-sidebar-chat-input')
+      : this.floatingWindow.querySelector('.nimi-chat-input');
     chatInput.value = '';
     chatInput.focus();
   }
@@ -1900,8 +1945,8 @@ class KimiMini {
 // 初始化插件
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    new KimiMini();
+    new NimiMini();
   });
 } else {
-  new KimiMini();
+  new NimiMini();
 }
