@@ -1,0 +1,70 @@
+{
+  "extensionName": {
+    "message": "nimi - AI助手浏览器插件",
+    "description": "扩展程序名称"
+  },
+  "extensionDescription": {
+    "message": "复刻Kimi核心功能：全文摘要、划词点问、浮窗交互",
+    "description": "扩展程序描述"
+  },
+  "summarizePage": {
+    "message": "生成全文摘要",
+    "description": "生成全文摘要按钮"
+  },
+  "explainSelection": {
+    "message": "点我问",
+    "description": "点我问按钮"
+  },
+  "openKimi": {
+    "message": "打开nimi",
+    "description": "打开nimi"
+  },
+  "closeKimi": {
+    "message": "关闭nimi",
+    "description": "关闭nimi"
+  },
+  "settings": {
+    "message": "设置",
+    "description": "设置"
+  },
+  "generatingSummary": {
+    "message": "正在生成摘要...",
+    "description": "正在生成摘要"
+  },
+  "floatingMode": {
+    "message": "浮窗模式",
+    "description": "浮窗模式"
+  },
+  "sidebarMode": {
+    "message": "侧边栏模式",
+    "description": "侧边栏模式"
+  },
+  "modelConfig": {
+    "message": "模型配置",
+    "description": "模型配置"
+  },
+  "displayMode": {
+    "message": "显示模式",
+    "description": "显示模式"
+  },
+  "userTemplates": {
+    "message": "用户指令模板",
+    "description": "用户指令模板"
+  },
+  "apiUrl": {
+    "message": "模型接口地址",
+    "description": "模型接口地址"
+  },
+  "apiKey": {
+    "message": "API Key",
+    "description": "API密钥"
+  },
+  "saveSettings": {
+    "message": "保存设置",
+    "description": "保存设置"
+  },
+  "settingsSaved": {
+    "message": "设置已保存",
+    "description": "设置已保存"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "nimi - AI助手浏览器插件",
+  "version": "1.0.0",
+  "description": "AI助手浏览器插件：全文摘要、划词点问、浮窗交互",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-script.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "nimi 设置"
+  },
+  "commands": {
+    "kimi-open": {
+      "suggested_key": {
+        "default": "Alt+K",
+        "mac": "Command+K"
+      },
+      "description": "打开/关闭浮窗"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "zh_CN"
+}
