@@ -16,7 +16,7 @@ chrome.commands.onCommand.addListener((command) => {
   }
 });
 
-// 安装时创建右键菜单
+// 安装时创建右键菜单并设置事件监听器
 chrome.runtime.onInstalled.addListener(() => {
   try {
     chrome.contextMenus.create({
@@ -37,40 +37,68 @@ chrome.runtime.onInstalled.addListener(() => {
       contexts: ['page']
     });
 
+    // 设置右键菜单事件监听器
+    setupContextMenus();
+
     // 打开设置页面（新安装时）
     chrome.tabs.create({
       url: chrome.runtime.getURL('popup.html')
     });
+
+    console.log('nimi 插件已安装，右键菜单已创建');
   } catch (error) {
-    console.error('创建右键菜单失败:', error);
+    console.error('安装插件时出错:', error);
   }
 });
 
 // 处理右键菜单点击
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+function setupContextMenus() {
   try {
-    if (!tab) return;
-
-    switch (info.menuItemId) {
-      case 'kimi-mini-summarize':
-        chrome.tabs.sendMessage(tab.id, { action: 'generateSummary' });
-        break;
-
-      case 'kimi-mini-selection':
-        chrome.tabs.sendMessage(tab.id, {
-          action: 'handleSelection',
-          selectionText: info.selectionText
-        });
-        break;
-
-      case 'kimi-mini-toggle':
-        chrome.tabs.sendMessage(tab.id, { action: 'toggleWindow' });
-        break;
+    // 检查 contextMenus API 是否可用
+    if (!chrome.contextMenus) {
+      console.error('contextMenus API 不可用，请检查 manifest.json 权限配置');
+      return;
     }
+
+    // 移除可能已存在的监听器（避免重复注册）
+    if (chrome.contextMenus.onClicked.hasListeners()) {
+      chrome.contextMenus.onClicked.removeListener(contextMenuClickHandler);
+    }
+
+    // 定义点击处理函数
+    async function contextMenuClickHandler(info, tab) {
+      try {
+        if (!tab) return;
+
+        switch (info.menuItemId) {
+          case 'kimi-mini-summarize':
+            chrome.tabs.sendMessage(tab.id, { action: 'generateSummary' });
+            break;
+
+          case 'kimi-mini-selection':
+            chrome.tabs.sendMessage(tab.id, {
+              action: 'handleSelection',
+              selectionText: info.selectionText
+            });
+            break;
+
+          case 'kimi-mini-toggle':
+            chrome.tabs.sendMessage(tab.id, { action: 'toggleWindow' });
+            break;
+        }
+      } catch (error) {
+        console.error('右键菜单点击处理失败:', error);
+      }
+    }
+
+    // 注册事件监听器
+    chrome.contextMenus.onClicked.addListener(contextMenuClickHandler);
+
+    console.log('右键菜单事件监听器已注册');
   } catch (error) {
-    console.error('右键菜单点击处理失败:', error);
+    console.error('注册右键菜单事件监听器失败:', error);
   }
-});
+}
 
 // 统一的消息监听器
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -111,4 +139,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Service Worker 启动时执行
 chrome.runtime.onStartup.addListener(() => {
   console.log('nimi Service Worker 已启动');
+  setupContextMenus();
+});
+
+// 确保 Service Worker 激活时也设置事件监听器
+self.addEventListener('activate', () => {
+  console.log('nimi Service Worker 已激活');
+  setupContextMenus();
 });
