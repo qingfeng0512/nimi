@@ -4,7 +4,7 @@
     "description": "扩展程序名称"
   },
   "extensionDescription": {
-    "message": "复刻Kimi核心功能：全文摘要、划词点问、浮窗交互",
+    "message": "复刻nimi核心功能：全文摘要、划词点问、浮窗交互",
     "description": "扩展程序描述"
   },
   "summarizePage": {
@@ -15,11 +15,11 @@
     "message": "点我问",
     "description": "点我问按钮"
   },
-  "openKimi": {
+  "openNimi": {
     "message": "打开nimi",
     "description": "打开nimi"
   },
-  "closeKimi": {
+  "closeNimi": {
     "message": "关闭nimi",
     "description": "关闭nimi"
   },

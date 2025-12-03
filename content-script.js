@@ -1,6 +1,57 @@
 // nimi content-script.js
 // 实现全文摘要、划词点问、浮窗/侧边栏功能
 
+// 动态加载加密工具
+let CryptoUtils = null;
+try {
+  // 尝试从全局作用域获取CryptoUtils
+  if (typeof CryptoUtils === 'undefined') {
+    // 如果popup已经加载了crypto-utils.js，它可能在全局作用域
+    CryptoUtils = window.CryptoUtils || null;
+  }
+} catch (error) {
+  console.warn('无法加载CryptoUtils:', error);
+}
+
+// 如果CryptoUtils不可用，创建一个简单的替代版本
+if (!CryptoUtils) {
+  console.warn('CryptoUtils不可用，使用简单替代版本');
+  CryptoUtils = {
+    secureDecode: function(encodedKey) {
+      // 简单替代：如果是安全格式，尝试解码，否则返回原值
+      if (!encodedKey) return '';
+      if (encodedKey.startsWith('nimi_secure_')) {
+        try {
+          // 简单解码逻辑
+          const withoutPrefix = encodedKey.substring('nimi_secure_'.length);
+          const reversed = withoutPrefix.split('').reverse().join('');
+          return decodeURIComponent(escape(atob(reversed)));
+        } catch (error) {
+          console.warn('简单解码失败:', error);
+          return encodedKey;
+        }
+      }
+      return encodedKey;
+    },
+    isSecureFormat: function(str) {
+      return str && str.startsWith('nimi_secure_');
+    },
+    migrateToSecureFormat: function(oldKey) {
+      if (!oldKey) return '';
+      if (this.isSecureFormat(oldKey)) return oldKey;
+      // 简单编码
+      try {
+        const base64 = btoa(unescape(encodeURIComponent(oldKey)));
+        const reversed = base64.split('').reverse().join('');
+        return 'nimi_secure_' + reversed;
+      } catch (error) {
+        console.error('简单编码失败:', error);
+        return oldKey;
+      }
+    }
+  };
+}
+
 class NimiMini {
   constructor() {
     this.isFloatingWindowOpen = false;
@@ -19,15 +70,30 @@ class NimiMini {
     this.bindEvents();
     this.bindEscapeKey();
     this.restoreState();
+
+    // 自动迁移API Key到安全格式
+    await this.migrateApiKeyToSecureFormat();
   }
 
   // 加载设置
   async loadSettings() {
     try {
       const result = await chrome.storage.sync.get(['modelUrl', 'apiKey', 'modelName', 'apiType', 'userTemplates', 'displayMode']);
+
+      // 安全解码API Key
+      let decodedApiKey = '';
+      if (result.apiKey) {
+        try {
+          decodedApiKey = CryptoUtils.secureDecode(result.apiKey);
+        } catch (error) {
+          console.warn('API Key解码失败，使用原值:', error);
+          decodedApiKey = result.apiKey;
+        }
+      }
+
       this.settings = {
         modelUrl: result.modelUrl || 'https://api.siliconflow.cn/v1/chat/completions',
-        apiKey: result.apiKey || '',
+        apiKey: decodedApiKey || '',
         modelName: result.modelName || 'MiniMaxAI/MiniMax-M2',
         apiType: result.apiType || 'anthropic', // 默认使用Anthropic格式
         userTemplates: result.userTemplates || [
@@ -134,11 +200,48 @@ class NimiMini {
     return session.messages;
   }
 
+  // 获取AI上下文（限制最多10轮对话）
+  getAIContext() {
+    if (!this.currentChatSession) {
+      return [];
+    }
+
+    const session = this.chatSessions.get(this.currentChatSession);
+    if (!session) {
+      return [];
+    }
+
+    // 限制最多10轮对话（20条消息）
+    const maxMessages = 20; // 10轮对话，每轮用户和AI各一条
+    if (session.messages.length <= maxMessages) {
+      return session.messages;
+    }
+
+    // 返回最近20条消息
+    return session.messages.slice(-maxMessages);
+  }
+
   // 创建新对话
   createNewChat() {
     this.currentChatSession = null;
     this.initChatSession();
     return this.currentChatSession;
+  }
+
+  // 清除当前对话
+  clearCurrentChat() {
+    if (!this.currentChatSession) {
+      return;
+    }
+
+    const session = this.chatSessions.get(this.currentChatSession);
+    if (session) {
+      // 清空消息，但保留会话
+      session.messages = [];
+      session.updatedAt = new Date().toISOString();
+      session.title = '新对话';
+      this.saveChatSessions();
+    }
   }
 
   // 切换对话会话
@@ -336,25 +439,30 @@ class NimiMini {
         </div>
         <div class="nimi-tabs">
           <button class="nimi-tab active" data-tab="summary">📄 摘要</button>
-          <button class="nimi-tab" data-tab="chat">💬 对话</button>
+          <!-- 对话功能暂不对外，隐藏标签页 -->
+          <!-- <button class="nimi-tab" data-tab="chat">💬 对话</button> -->
         </div>
         <div class="nimi-content">
           <div class="nimi-tab-content nimi-summary-tab active">
             <button class="nimi-summarize-btn">📄 生成全文摘要</button>
             <div class="nimi-result"></div>
           </div>
+          <!-- 对话功能暂不对外，隐藏面板 -->
+          <!--
           <div class="nimi-tab-content nimi-chat-tab">
             <div class="nimi-chat-container">
               <div class="nimi-chat-messages"></div>
               <div class="nimi-chat-input-area">
                 <textarea class="nimi-chat-input" placeholder="输入消息... (Shift+Enter换行，Enter发送)"></textarea>
                 <div class="nimi-chat-actions">
+                  <button class="nimi-clear-chat-btn" title="清除当前对话">🗑️</button>
                   <button class="nimi-new-chat-btn" title="新建对话">🆕</button>
                   <button class="nimi-send-btn" title="发送消息 (Enter)">发送</button>
                 </div>
               </div>
             </div>
           </div>
+          -->
         </div>
         <div class="nimi-copyright">@世界那么哒</div>
         <div class="nimi-resize-handle" title="拖拽调整大小"></div>
@@ -649,6 +757,20 @@ class NimiMini {
             justify-content: space-between;
             align-items: center;
           }
+          .nimi-clear-chat-btn {
+            background: #fff5f5;
+            border: 1px solid #ffd1d1;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #ff6b6b;
+            transition: all 0.2s;
+          }
+          .nimi-clear-chat-btn:hover {
+            background: #ffeaea;
+            color: #ff3b3b;
+          }
           .nimi-new-chat-btn {
             background: #f0f8fa;
             border: 1px solid #ddd;
@@ -740,17 +862,25 @@ class NimiMini {
         });
       });
 
-      // 绑定对话事件
+      // 对话功能暂不对外，注释事件绑定
+      /*
       const chatInput = this.floatingWindow.querySelector('.nimi-chat-input');
       const sendBtn = this.floatingWindow.querySelector('.nimi-send-btn');
       const newChatBtn = this.floatingWindow.querySelector('.nimi-new-chat-btn');
+      const clearChatBtn = this.floatingWindow.querySelector('.nimi-clear-chat-btn');
 
       sendBtn.addEventListener('click', () => {
         this.sendChatMessage(chatInput.value, false);
       });
 
       newChatBtn.addEventListener('click', () => {
-        this.createNewChat(false);
+        this.createNewChat();
+        this.refreshChatMessages(false);
+      });
+
+      clearChatBtn.addEventListener('click', () => {
+        this.clearCurrentChat();
+        this.refreshChatMessages(false);
       });
 
       chatInput.addEventListener('keydown', (e) => {
@@ -759,6 +889,7 @@ class NimiMini {
           this.sendChatMessage(chatInput.value, false);
         }
       });
+      */
 
       // 可拖拽
       this.makeDraggable(this.floatingWindow);
@@ -806,25 +937,30 @@ class NimiMini {
         </div>
         <div class="nimi-sidebar-tabs">
           <button class="nimi-sidebar-tab active" data-tab="summary">📄 摘要</button>
-          <button class="nimi-sidebar-tab" data-tab="chat">💬 对话</button>
+          <!-- 对话功能暂不对外，隐藏标签页 -->
+          <!-- <button class="nimi-sidebar-tab" data-tab="chat">💬 对话</button> -->
         </div>
         <div class="nimi-sidebar-content">
           <div class="nimi-sidebar-tab-content nimi-sidebar-summary-tab active">
             <button class="nimi-sidebar-summarize">📄 生成全文摘要</button>
             <div class="nimi-sidebar-result"></div>
           </div>
+          <!-- 对话功能暂不对外，隐藏面板 -->
+          <!--
           <div class="nimi-sidebar-tab-content nimi-sidebar-chat-tab">
             <div class="nimi-sidebar-chat-container">
               <div class="nimi-sidebar-chat-messages"></div>
               <div class="nimi-sidebar-chat-input-area">
                 <textarea class="nimi-sidebar-chat-input" placeholder="输入消息... (Shift+Enter换行，Enter发送)"></textarea>
                 <div class="nimi-sidebar-chat-actions">
+                  <button class="nimi-sidebar-clear-chat-btn" title="清除当前对话">🗑️</button>
                   <button class="nimi-sidebar-new-chat-btn" title="新建对话">🆕</button>
                   <button class="nimi-sidebar-send-btn" title="发送消息 (Enter)">发送</button>
                 </div>
               </div>
             </div>
           </div>
+          -->
         </div>
         <div class="nimi-sidebar-copyright">@世界那么哒</div>
         <div class="nimi-sidebar-resize-handle" title="拖拽调整大小"></div>
@@ -1060,6 +1196,20 @@ class NimiMini {
             justify-content: space-between;
             align-items: center;
           }
+          .nimi-sidebar-clear-chat-btn {
+            background: #fff5f5;
+            border: 1px solid #ffd1d1;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #ff6b6b;
+            transition: all 0.2s;
+          }
+          .nimi-sidebar-clear-chat-btn:hover {
+            background: #ffeaea;
+            color: #ff3b3b;
+          }
           .nimi-sidebar-new-chat-btn {
             background: #f0f8fa;
             border: 1px solid #ddd;
@@ -1154,17 +1304,25 @@ class NimiMini {
         });
       });
 
-      // 绑定对话事件
+      // 对话功能暂不对外，注释事件绑定
+      /*
       const chatInput = this.sidebar.querySelector('.nimi-sidebar-chat-input');
       const sendBtn = this.sidebar.querySelector('.nimi-sidebar-send-btn');
       const newChatBtn = this.sidebar.querySelector('.nimi-sidebar-new-chat-btn');
+      const clearChatBtn = this.sidebar.querySelector('.nimi-sidebar-clear-chat-btn');
 
       sendBtn.addEventListener('click', () => {
         this.sendChatMessage(chatInput.value, true);
       });
 
       newChatBtn.addEventListener('click', () => {
-        this.createNewChat(true);
+        this.createNewChat();
+        this.refreshChatMessages(true);
+      });
+
+      clearChatBtn.addEventListener('click', () => {
+        this.clearCurrentChat();
+        this.refreshChatMessages(true);
       });
 
       chatInput.addEventListener('keydown', (e) => {
@@ -1173,6 +1331,7 @@ class NimiMini {
           this.sendChatMessage(chatInput.value, true);
         }
       });
+      */
 
       // 添加调整大小功能
       this.makeResizable(this.sidebar, true);
@@ -1839,8 +1998,8 @@ class NimiMini {
 
   // 调用聊天API（流式响应）
   async callChatAPI(userMessage, onStreamChunk, onStreamComplete) {
-    // 获取当前对话上下文
-    const messages = this.getChatContext();
+    // 获取当前对话上下文（限制最多10轮对话）
+    const messages = this.getAIContext();
 
     // 确保消息格式正确
     const formattedMessages = messages.map(msg => ({
@@ -1939,6 +2098,42 @@ class NimiMini {
       : this.floatingWindow.querySelector('.nimi-chat-input');
     chatInput.value = '';
     chatInput.focus();
+  }
+
+  // 迁移API Key到安全格式
+  async migrateApiKeyToSecureFormat() {
+    try {
+      // 从存储中获取当前的API Key
+      const result = await chrome.storage.sync.get(['apiKey']);
+      const oldKey = result.apiKey;
+
+      if (!oldKey) {
+        console.log('没有找到API Key，无需迁移');
+        return;
+      }
+
+      // 如果已经是安全格式，无需迁移
+      if (CryptoUtils.isSecureFormat(oldKey)) {
+        console.log('API Key已经是安全格式，无需迁移');
+        return;
+      }
+
+      console.log('开始迁移API Key到安全格式...');
+
+      // 迁移到安全格式
+      const newKey = CryptoUtils.migrateToSecureFormat(oldKey);
+
+      // 保存回存储
+      await chrome.storage.sync.set({ apiKey: newKey });
+
+      console.log('API Key迁移完成');
+
+      // 重新加载设置以使用新的安全格式
+      await this.loadSettings();
+
+    } catch (error) {
+      console.error('API Key迁移失败:', error);
+    }
   }
 }
 

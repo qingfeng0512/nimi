@@ -27,7 +27,7 @@
     "default_title": "nimi 设置"
   },
   "commands": {
-    "kimi-open": {
+    "nimi-open": {
       "suggested_key": {
         "default": "Alt+K",
         "mac": "Command+K"

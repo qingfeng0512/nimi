@@ -3,7 +3,7 @@
 
 // 监听快捷键命令
 chrome.commands.onCommand.addListener((command) => {
-  if (command === 'kimi-open') {
+  if (command === 'nimi-open') {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleWindow' }, (response) => {
@@ -20,19 +20,19 @@ chrome.commands.onCommand.addListener((command) => {
 chrome.runtime.onInstalled.addListener(() => {
   try {
     chrome.contextMenus.create({
-      id: 'kimi-mini-summarize',
+      id: 'nimi-mini-summarize',
       title: '✨ 用nimi生成摘要',
       contexts: ['page']
     });
 
     chrome.contextMenus.create({
-      id: 'kimi-mini-selection',
+      id: 'nimi-mini-selection',
       title: '✨ 用nimi解释选中文本',
       contexts: ['selection']
     });
 
     chrome.contextMenus.create({
-      id: 'kimi-mini-toggle',
+      id: 'nimi-mini-toggle',
       title: '✨ 打开/关闭nimi',
       contexts: ['page']
     });
@@ -71,18 +71,18 @@ function setupContextMenus() {
         if (!tab) return;
 
         switch (info.menuItemId) {
-          case 'kimi-mini-summarize':
+          case 'nimi-mini-summarize':
             chrome.tabs.sendMessage(tab.id, { action: 'generateSummary' });
             break;
 
-          case 'kimi-mini-selection':
+          case 'nimi-mini-selection':
             chrome.tabs.sendMessage(tab.id, {
               action: 'handleSelection',
               selectionText: info.selectionText
             });
             break;
 
-          case 'kimi-mini-toggle':
+          case 'nimi-mini-toggle':
             chrome.tabs.sendMessage(tab.id, { action: 'toggleWindow' });
             break;
         }

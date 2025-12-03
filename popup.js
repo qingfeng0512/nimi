@@ -41,7 +41,21 @@ class SettingsManager {
     // 填充表单
     document.getElementById('apiType').value = this.settings.apiType;
     document.getElementById('modelUrl').value = this.settings.modelUrl;
-    document.getElementById('apiKey').value = this.settings.apiKey;
+
+    // 安全解码API Key
+    if (this.settings.apiKey) {
+      try {
+        const decodedKey = CryptoUtils.secureDecode(this.settings.apiKey);
+        document.getElementById('apiKey').value = decodedKey;
+        // 更新settings中的API Key为解码后的值
+        this.settings.apiKey = decodedKey;
+      } catch (error) {
+        console.error('API Key解码失败:', error);
+        document.getElementById('apiKey').value = this.settings.apiKey;
+      }
+    } else {
+      document.getElementById('apiKey').value = '';
+    }
 
     // 如果有保存的模型名称，尝试获取模型列表
     if (this.settings.modelName && this.settings.modelUrl) {
@@ -145,7 +159,7 @@ class SettingsManager {
       this.settings.apiType = document.getElementById('apiType').value;
       this.settings.modelUrl = document.getElementById('modelUrl').value.trim();
       this.settings.modelName = document.getElementById('modelName').value;
-      this.settings.apiKey = document.getElementById('apiKey').value.trim();
+      const rawApiKey = document.getElementById('apiKey').value.trim();
 
       // 验证必填项
       if (!this.settings.modelUrl) {
@@ -156,22 +170,34 @@ class SettingsManager {
         this.showStatus('请选择模型名称', 'error');
         return;
       }
-      if (!this.settings.apiKey) {
+      if (!rawApiKey) {
         this.showStatus('请填写API Key', 'error');
         return;
       }
 
-      // 保存到storage
+      // 安全编码API Key
+      let encodedApiKey = '';
+      try {
+        encodedApiKey = CryptoUtils.secureEncode(rawApiKey);
+        // 更新settings中的API Key为原始值（用于后续操作）
+        this.settings.apiKey = rawApiKey;
+      } catch (error) {
+        console.error('API Key编码失败:', error);
+        this.showStatus('❌ API Key编码失败，请重试', 'error');
+        return;
+      }
+
+      // 保存到storage（使用编码后的API Key）
       await chrome.storage.sync.set({
         apiType: this.settings.apiType,
         modelUrl: this.settings.modelUrl,
         modelName: this.settings.modelName,
-        apiKey: this.settings.apiKey,
+        apiKey: encodedApiKey,
         userTemplates: this.settings.userTemplates,
         displayMode: this.settings.displayMode
       });
 
-      this.showStatus('✅ 设置已保存', 'success');
+      this.showStatus('✅ 设置已保存（API Key已安全存储）', 'success');
 
       // 3秒后关闭弹窗
       setTimeout(() => {
@@ -209,7 +235,7 @@ class SettingsManager {
   // 从接口获取模型清单
   async fetchModels() {
     const modelUrl = document.getElementById('modelUrl').value.trim();
-    const apiKey = document.getElementById('apiKey').value.trim();
+    const rawApiKey = document.getElementById('apiKey').value.trim();
     const modelSelect = document.getElementById('modelName');
     const refreshBtn = document.getElementById('refreshModelsBtn');
 
@@ -219,7 +245,7 @@ class SettingsManager {
       return;
     }
 
-    if (!apiKey) {
+    if (!rawApiKey) {
       this.showStatus('请先填写API Key', 'error');
       this.clearModelList();
       return;
@@ -239,7 +265,7 @@ class SettingsManager {
       const response = await fetch(modelsUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${rawApiKey}`,
           'Content-Type': 'application/json'
         }
       });
@@ -306,7 +332,7 @@ class SettingsManager {
   // 测试API接口连接
   async testApiConnection() {
     const modelUrl = document.getElementById('modelUrl').value.trim();
-    const apiKey = document.getElementById('apiKey').value.trim();
+    const rawApiKey = document.getElementById('apiKey').value.trim();
     const modelName = document.getElementById('modelName').value;
     const apiType = document.getElementById('apiType').value;
     const testBtn = document.getElementById('testApiBtn');
@@ -317,7 +343,7 @@ class SettingsManager {
       return;
     }
 
-    if (!apiKey) {
+    if (!rawApiKey) {
       this.showTestResult('请先填写API Key', 'error');
       return;
     }
@@ -338,7 +364,7 @@ class SettingsManager {
       let requestData = {};
       let headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${rawApiKey}`
       };
 
       if (apiType === 'anthropic') {
