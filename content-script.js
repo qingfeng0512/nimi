@@ -652,6 +652,22 @@ class KimiMini {
             border-top: 1px solid #f0f0f0;
             background: #fafafa;
           }
+
+          /* 流式响应打字机效果 */
+          .ai-streaming-content.streaming {
+            position: relative;
+          }
+          .ai-streaming-content.streaming::after {
+            content: '▋';
+            animation: blink 1s infinite;
+            color: #49bccf;
+            font-weight: bold;
+            margin-left: 2px;
+          }
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+          }
         </style>
       `;
       document.body.appendChild(this.floatingWindow);
@@ -1047,6 +1063,22 @@ class KimiMini {
             border-top: 1px solid #f0f0f0;
             background: #fafafa;
             margin-top: auto;
+          }
+
+          /* 侧边栏流式响应打字机效果 */
+          .ai-streaming-content.streaming {
+            position: relative;
+          }
+          .ai-streaming-content.streaming::after {
+            content: '▋';
+            animation: blink 1s infinite;
+            color: #49bccf;
+            font-weight: bold;
+            margin-left: 2px;
+          }
+          @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
           }
         </style>
       `;
@@ -1571,7 +1603,7 @@ class KimiMini {
     });
   }
 
-  // 发送聊天消息
+  // 发送聊天消息（支持流式响应）
   async sendChatMessage(content, isSidebar) {
     content = content.trim();
     if (!content) return;
@@ -1588,6 +1620,10 @@ class KimiMini {
     chatInput.value = '';
     sendBtn.disabled = true;
 
+    // 创建AI消息占位符
+    let aiMessageId = null;
+    let aiMessageContent = '';
+
     try {
       // 添加用户消息
       await this.addMessage('user', content);
@@ -1596,23 +1632,142 @@ class KimiMini {
       // 显示加载状态
       this.showChatLoading(isSidebar, true);
 
-      // 调用AI API
-      const response = await this.callChatAPI(content);
+      // 创建AI消息占位符
+      aiMessageId = this.createAIMessagePlaceholder(isSidebar);
 
-      // 添加AI回复
-      await this.addMessage('assistant', response);
-      this.refreshChatMessages(isSidebar);
+      // 调用AI API（流式）
+      await this.callChatAPI(
+        content,
+        // 流式数据块回调
+        (chunk, fullContent) => {
+          aiMessageContent = fullContent;
+          this.updateAIMessageContent(isSidebar, aiMessageId, fullContent);
+        },
+        // 流式完成回调
+        (fullContent) => {
+          aiMessageContent = fullContent;
+          this.finalizeAIMessage(isSidebar, aiMessageId, fullContent);
+        }
+      );
 
     } catch (error) {
       console.error('发送消息失败:', error);
 
       // 显示错误消息
-      await this.addMessage('assistant', `抱歉，发送消息时出现错误：${error.message}`);
-      this.refreshChatMessages(isSidebar);
+      if (aiMessageId) {
+        this.updateAIMessageContent(isSidebar, aiMessageId, `抱歉，发送消息时出现错误：${error.message}`);
+        this.finalizeAIMessage(isSidebar, aiMessageId, `抱歉，发送消息时出现错误：${error.message}`);
+      } else {
+        await this.addMessage('assistant', `抱歉，发送消息时出现错误：${error.message}`);
+        this.refreshChatMessages(isSidebar);
+      }
     } finally {
       // 恢复发送按钮
       sendBtn.disabled = false;
       this.showChatLoading(isSidebar, false);
+
+      // 如果AI消息已创建但未保存，则保存到对话历史
+      if (aiMessageId && aiMessageContent) {
+        await this.saveAIMessageToHistory(aiMessageContent);
+      }
+    }
+  }
+
+  // 创建AI消息占位符
+  createAIMessagePlaceholder(isSidebar) {
+    const messagesContainer = isSidebar
+      ? this.sidebar.querySelector('.kimi-sidebar-chat-messages')
+      : this.floatingWindow.querySelector('.kimi-chat-messages');
+
+    const messageId = 'ai-message-' + Date.now();
+    const messageEl = document.createElement('div');
+    messageEl.id = messageId;
+    messageEl.className = isSidebar ? 'kimi-sidebar-chat-message assistant' : 'kimi-chat-message assistant';
+    messageEl.innerHTML = `
+      <div class="ai-streaming-content"></div>
+      <div class="timestamp">${this.formatTime(new Date().toISOString())}</div>
+    `;
+
+    messagesContainer.appendChild(messageEl);
+
+    // 滚动到底部
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    return messageId;
+  }
+
+  // 更新AI消息内容（流式）
+  updateAIMessageContent(isSidebar, messageId, content) {
+    const messagesContainer = isSidebar
+      ? this.sidebar.querySelector('.kimi-sidebar-chat-messages')
+      : this.floatingWindow.querySelector('.kimi-chat-messages');
+
+    const messageEl = messagesContainer.querySelector(`#${messageId}`);
+    if (messageEl) {
+      const contentEl = messageEl.querySelector('.ai-streaming-content');
+      if (contentEl) {
+        // 使用Markdown渲染
+        contentEl.innerHTML = this.renderMarkdown(content);
+
+        // 添加打字机效果类
+        contentEl.classList.add('streaming');
+
+        // 滚动到底部
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }
+  }
+
+  // 完成AI消息（流式结束）
+  finalizeAIMessage(isSidebar, messageId, content) {
+    const messagesContainer = isSidebar
+      ? this.sidebar.querySelector('.kimi-sidebar-chat-messages')
+      : this.floatingWindow.querySelector('.kimi-chat-messages');
+
+    const messageEl = messagesContainer.querySelector(`#${messageId}`);
+    if (messageEl) {
+      const contentEl = messageEl.querySelector('.ai-streaming-content');
+      if (contentEl) {
+        // 移除打字机效果类
+        contentEl.classList.remove('streaming');
+
+        // 更新内容
+        contentEl.innerHTML = this.renderMarkdown(content);
+
+        // 更新消息类名
+        messageEl.className = isSidebar ? 'kimi-sidebar-chat-message assistant' : 'kimi-chat-message assistant';
+
+        // 滚动到底部
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }
+  }
+
+  // 保存AI消息到对话历史
+  async saveAIMessageToHistory(content) {
+    if (!this.currentChatSession) {
+      this.initChatSession();
+    }
+
+    const session = this.chatSessions.get(this.currentChatSession);
+    if (session) {
+      // 检查是否已经存在相同的AI消息
+      const lastMessage = session.messages[session.messages.length - 1];
+      if (lastMessage && lastMessage.role === 'assistant') {
+        // 更新最后一条AI消息
+        lastMessage.content = content;
+        lastMessage.timestamp = new Date().toISOString();
+      } else {
+        // 添加新的AI消息
+        session.messages.push({
+          role: 'assistant',
+          content: content,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      session.updatedAt = new Date().toISOString();
+      await this.saveChatSessions();
     }
   }
 
@@ -1637,8 +1792,8 @@ class KimiMini {
     }
   }
 
-  // 调用聊天API
-  async callChatAPI(userMessage) {
+  // 调用聊天API（流式响应）
+  async callChatAPI(userMessage, onStreamChunk, onStreamComplete) {
     // 获取当前对话上下文
     const messages = this.getChatContext();
 
@@ -1648,16 +1803,17 @@ class KimiMini {
       content: msg.content
     }));
 
-    // 构建API请求
+    // 构建API请求 - 使用nimi设置中的接口地址
     const requestData = {
-      model: this.settings.model || 'gpt-3.5-turbo',
+      model: this.settings.modelName || 'gpt-3.5-turbo',
       messages: formattedMessages,
       temperature: 0.7,
-      max_tokens: 2000
+      max_tokens: 2000,
+      stream: true  // 启用流式响应
     };
 
     try {
-      const response = await fetch(this.settings.apiUrl, {
+      const response = await fetch(this.settings.modelUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1667,16 +1823,58 @@ class KimiMini {
       });
 
       if (!response.ok) {
-        throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`API请求失败 (${response.status}): ${errorText}`);
       }
 
-      const data = await response.json();
+      // 处理流式响应
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullResponse = '';
 
-      if (data.error) {
-        throw new Error(data.error.message || 'API返回错误');
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+
+              if (data === '[DONE]') {
+                // 流结束
+                if (onStreamComplete) {
+                  onStreamComplete(fullResponse);
+                }
+                return fullResponse;
+              }
+
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta) {
+                  const content = parsed.choices[0].delta.content || '';
+                  if (content) {
+                    fullResponse += content;
+                    if (onStreamChunk) {
+                      onStreamChunk(content, fullResponse);
+                    }
+                  }
+                }
+              } catch (e) {
+                // 忽略解析错误，继续处理下一个数据块
+                console.debug('解析流数据失败:', e, '原始数据:', data);
+              }
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
       }
 
-      return data.choices[0].message.content;
+      return fullResponse;
     } catch (error) {
       console.error('调用聊天API失败:', error);
       throw error;
